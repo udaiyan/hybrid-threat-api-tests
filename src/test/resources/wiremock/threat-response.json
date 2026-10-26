@@ -1,0 +1,18 @@
+{
+  "id": "11111111-1111-1111-1111-111111111111",
+  "name": "Synthetic phishing campaign",
+  "status": "OPEN",
+  "severity": "HIGH",
+  "detectedAt": "2026-10-01T09:00:00Z",
+  "source": { "name": "Synthetic OSINT feed" },
+  "indicators": [
+    {
+      "id": "33333333-3333-3333-3333-333333333333",
+      "type": "DOMAIN",
+      "value": "synthetic.example.com",
+      "confidence": 0.87,
+      "firstSeen": "2026-10-01T08:00:00Z",
+      "lastSeen": "2026-10-01T09:00:00Z"
+    }
+  ]
+}

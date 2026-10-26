@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: hybrid-threat-api-tests
+  datasource:
+    url: jdbc:postgresql://localhost:5432/threatapi
+    username: threatapi
+    password: threatapi
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+
+threatapi:
+  security:
+    paseto-token: v4.local.synthetic-demo-token

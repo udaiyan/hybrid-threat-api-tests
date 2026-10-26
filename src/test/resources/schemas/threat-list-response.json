@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["threats", "page"],
+  "properties": {
+    "threats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status", "severity", "detectedAt", "source"],
+        "properties": {
+    "id": { "type": "string" },
+        "name": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["OPEN", "INVESTIGATING", "MITIGATED", "CLOSED"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+        },
+        "detectedAt": { "type": "string" },
+        "source": {
+          "type": "object",
+          "required": ["name"],
+          "properties": { "name": { "type": "string" } }
+        },
+        "indicators": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "value", "confidence"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["DOMAIN", "IP_ADDRESS", "URL", "HASH", "EMAIL_ADDRESS"]
+              },
+              "value": { "type": "string" },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+              "firstSeen": { "type": ["string", "null"] },
+              "lastSeen": { "type": ["string", "null"] }
+            }
+          }
+        }
+
+        }
+      }
+    },
+    "page": {
+      "type": "object",
+      "required": ["page", "size", "totalElements", "totalPages"],
+      "properties": {
+        "page": { "type": "integer", "minimum": 0 },
+        "size": { "type": "integer", "minimum": 1 },
+        "totalElements": { "type": "integer", "minimum": 0 },
+        "totalPages": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

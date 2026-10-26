@@ -1,0 +1,290 @@
+openapi: 3.0.3
+info:
+  title: Synthetic Threat API
+  description: Synthetic API contract for testing demonstration purposes only.
+  version: 1.0.0
+paths:
+  /api/v1/health:
+    get:
+      summary: Health check
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/threats:
+    get:
+      summary: List threats
+      operationId: listThreats
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ThreatStatus'
+        - name: severity
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/Severity'
+      responses:
+        '200':
+          description: Page of threats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreatListResponse'
+        '400':
+          description: Invalid pagination or filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Create a threat
+      operationId: createThreat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThreatCreate'
+      responses:
+        '201':
+          description: Threat created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Threat'
+        '400':
+          description: Invalid threat payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/threats/{threatId}:
+    get:
+      summary: Get a threat by ID
+      operationId: getThreat
+      parameters:
+        - name: threatId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Threat found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Threat'
+        '404':
+          description: Threat not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/assessments:
+    get:
+      summary: Get synthetic assessments
+      operationId: getAssessments
+      security:
+        - PasetoBearer: []
+      responses:
+        '200':
+          description: Assessments returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Assessment'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    PasetoBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: PASETO
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    ThreatStatus:
+      type: string
+      enum: [OPEN, INVESTIGATING, MITIGATED, CLOSED]
+    Severity:
+      type: string
+      enum: [LOW, MEDIUM, HIGH, CRITICAL]
+    IndicatorType:
+      type: string
+      enum: [DOMAIN, IP_ADDRESS, URL, HASH, EMAIL_ADDRESS]
+    Source:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+    IndicatorCreate:
+      type: object
+      required: [type, value, confidence]
+      properties:
+        type:
+          $ref: '#/components/schemas/IndicatorType'
+        value:
+          type: string
+          minLength: 1
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        firstSeen:
+          type: string
+          format: date-time
+          nullable: true
+        lastSeen:
+          type: string
+          format: date-time
+          nullable: true
+    Indicator:
+      type: object
+      required: [id, type, value, confidence]
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/IndicatorType'
+        value:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        firstSeen:
+          type: string
+          format: date-time
+          nullable: true
+        lastSeen:
+          type: string
+          format: date-time
+          nullable: true
+    ThreatCreate:
+      type: object
+      required: [name, status, severity, detectedAt, source]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        status:
+          $ref: '#/components/schemas/ThreatStatus'
+        severity:
+          $ref: '#/components/schemas/Severity'
+        detectedAt:
+          type: string
+          format: date-time
+        source:
+          $ref: '#/components/schemas/Source'
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/IndicatorCreate'
+    Threat:
+      type: object
+      required: [id, name, status, severity, detectedAt, source]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/ThreatStatus'
+        severity:
+          $ref: '#/components/schemas/Severity'
+        detectedAt:
+          type: string
+          format: date-time
+        source:
+          $ref: '#/components/schemas/Source'
+        indicators:
+          type: array
+          items:
+            $ref: '#/components/schemas/Indicator'
+    PageMeta:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+    ThreatListResponse:
+      type: object
+      required: [threats, page]
+      properties:
+        threats:
+          type: array
+          items:
+            $ref: '#/components/schemas/Threat'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    Assessment:
+      type: object
+      required: [id, threatId, summary, assessedAt]
+      properties:
+        id:
+          type: string
+        threatId:
+          type: string
+        summary:
+          type: string
+        assessedAt:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required: [timestamp, status, error, message, path]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string

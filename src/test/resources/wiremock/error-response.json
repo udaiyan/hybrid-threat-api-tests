@@ -1,0 +1,7 @@
+{
+  "timestamp": "2026-10-01T00:00:00Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Synthetic validation error",
+  "path": "/api/v1/threats"
+}
